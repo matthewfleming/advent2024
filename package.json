@@ -12,7 +12,9 @@
     "@oclif/plugin-help": "^6",
     "@oclif/plugin-plugins": "^5",
     "@types/d3": "^7.4.3",
+    "@types/lodash": "^4.17.13",
     "d3": "^7.9.0",
+    "lodash": "^4.17.21",
     "mathjs": "^14.0.0"
   },
   "devDependencies": {
