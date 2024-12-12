@@ -8,11 +8,6 @@ If the stone is engraved with a number that has an even number of digits, it is 
 If none of the other rules apply, the stone is replaced by a new stone; the old stone's number multiplied by 2024 is engraved on the new stone.
  */
 
-interface Division {
-  level: number
-  list: number[]
-}
-
 function rules(number: number): number[] {
   if (number === 0) return [1]
 
@@ -25,16 +20,21 @@ function rules(number: number): number[] {
   return [number * 2024]
 }
 
-function blink(division: Division, blinks: number): Division {
-  let result = division
-  while (blinks--) {
-    result = {
-      level: result.level + 1,
-      list: result.list.flatMap((number) => rules(number)),
-    }
+const stones: Record<string, number> = {}
+
+function blink(x: number, blinks: number): number {
+  const key = `${x}-${blinks}`
+  if (stones[key]) return stones[key]
+
+  const next = rules(x)
+  if (blinks === 1) {
+    stones[key] = next.length
+    return next.length
   }
 
-  return result
+  const recurse = next.reduce((acc, value) => acc + blink(value, blinks - 1), 0)
+  stones[key] = recurse
+  return recurse
 }
 
 export default class Q1 extends Command {
@@ -61,39 +61,20 @@ export default class Q1 extends Command {
       input: fileStream,
     })
 
-    const list: Division[] = []
+    const list: number[] = []
     for await (const line of rl) {
       const data = line.split(/\s+/)
-      list.push({level: 1, list: data.map((value) => Number.parseInt(value, 10))})
+      list.push(...data.map((value) => Number.parseInt(value, 10)))
     }
 
-    const blinks = 75
-    let sum = 0
-    let input
-    while ((input = list.pop())) {
-      const output: number[] = []
-
-      for (const number of input.list) {
-        const result = rules(number)
-        output.push(...result)
-      }
-
-      if (input.level < blinks) {
-        if (output.length > 100) {
-          const slice = output.length / 2
-          const left = output.slice(0, slice)
-          const right = output.slice(slice)
-          list.push({level: input.level + 1, list: right}, {level: input.level + 1, list: left})
-        } else {
-          list.push({level: input.level + 1, list: output})
-        }
-      } else {
-        sum += output.length
-      }
-
-      // this.log('Iteration:', output)
+    let sum1 = 0
+    let sum2 = 0
+    for (const number of list) {
+      sum1 += blink(number, 25)
+      sum2 += blink(number, 75)
     }
 
-    this.log('Stones:', sum)
+    this.log('Stones (Part 1):', sum1)
+    this.log('Stones (Part 2):', sum2)
   }
 }
