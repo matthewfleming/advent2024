@@ -22,7 +22,7 @@
     "@oclif/test": "^4",
     "@types/chai": "^4",
     "@types/mocha": "^10",
-    "@types/node": "^18",
+    "@types/node": "^22",
     "chai": "^4",
     "eslint": "^8",
     "eslint-config-oclif": "^5",
@@ -35,7 +35,7 @@
     "typescript": "^5"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "files": [
     "/bin",
