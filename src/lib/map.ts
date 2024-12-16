@@ -5,6 +5,14 @@ export enum Direction {
   up = '^',
 }
 
+export function isVertical(d: Direction): d is Direction.down | Direction.up {
+  return d === Direction.up || d === Direction.down
+}
+
+export function isHorizontal(d: Direction): d is Direction.left | Direction.right {
+  return d === Direction.left || d === Direction.right
+}
+
 export interface Node<T = string> {
   type: T
   x: number
