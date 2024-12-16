@@ -1,6 +1,8 @@
+/* eslint-disable no-constant-condition */
 import {Command} from '@oclif/core'
 import {createReadStream} from 'node:fs'
 import {createInterface} from 'node:readline/promises'
+import {generatePrimes} from 'prime-lib'
 
 interface Machine {
   a: {
@@ -23,6 +25,35 @@ function press(machine: Machine, a: number, b: number) {
   const y = machine.a.y * a + machine.b.y * b
 
   return {cost, x, y}
+}
+
+type FactorizeResult =
+  | {
+      a: number
+      b: number
+      cost: number
+      success: true
+    }
+  | {
+      success: false
+      x: number
+      y: number
+    }
+
+function factorize(machine: Machine, a: number, b: number): FactorizeResult {
+  const x = machine.a.x * a + machine.b.x * b
+  const y = machine.a.y * a + machine.b.y * b
+
+  // console.log(`A=${a}, B=${b}, X=${x}, Y=${y}`)
+  if (machine.prize.x % x === 0 && machine.prize.y % y === 0) {
+    const factor = machine.prize.x / x
+    const ra = a * factor
+    const rb = b * factor
+    const cost = 3 * ra + rb
+    return {a: ra, b: rb, cost, success: true}
+  }
+
+  return {success: false, x, y}
 }
 
 function maxPress(machine: Machine) {
@@ -51,33 +82,48 @@ function bruteForce(machine: Machine) {
   return best
 }
 
+function* generateNumbers() {
+  const primes = generatePrimes()
+  yield 0
+  yield 1
+  while (true) {
+    yield primes.next().value as number
+  }
+}
+
 function test(machine: Machine) {
-  const {maxA, maxB} = maxPress(machine)
+  const maxX = machine.prize.x
+  const maxY = machine.prize.y
+  const maxA = Math.max(Math.ceil(maxX / machine.a.x), Math.ceil(maxY / machine.a.y))
+  const maxB = Math.max(Math.ceil(maxX / machine.b.x), Math.ceil(maxY / machine.b.y))
+
+  // console.log({maxX, maxY}, machine)
+  const aValues = generateNumbers()
+  let a
+  let b
   let best
+  while (true) {
+    a = aValues.next().value as number
 
-  let a = maxA
-  while (a >= 0) {
-    let b = Math.floor(Math.min(machine.prize.x / a / machine.b.x, machine.prize.y / a / machine.b.y))
-    while (b <= maxB) {
-      const {cost, x, y} = press(machine, a, b)
-      if (x === machine.prize.x && y === machine.prize.y) {
-        console.log(`A=${a}, B=${b}, Cost=${cost}`)
-        if (!best || cost < best.cost) {
-          best = {a, b, cost}
+    const bValues = generateNumbers()
+    while (true) {
+      b = bValues.next().value as number
+
+      const result = factorize(machine, a, b)
+
+      if (result.success) {
+        if (!best || result.cost < best.cost) {
+          best = result
         }
-      }
+      } else if (a > maxA || b > maxB) {
+        if (b === 0) {
+          return best
+        }
 
-      if (x > machine.prize.x || y > machine.prize.y) {
         break
       }
-
-      b++
     }
-
-    a--
   }
-
-  return best
 }
 
 export default class Q13 extends Command {
@@ -167,7 +213,25 @@ export default class Q13 extends Command {
         tokens += best.cost
         won++
       }
+      // console.log(best)
     }
+
+    // for (const machine of machines) {
+
+    //   const best = reduce(machine.prize.x)
+    //   console.log(best)
+    // }
+    // tokens = 0
+    // won = 0
+    // for (const machine of machines) {
+    //   machine.prize.x += 10_000_000_000_000
+    //   machine.prize.y += 10_000_000_000_000
+    //   const best = test(machine)
+    //   if (best) {
+    //     tokens += best.cost
+    //     won++
+    //   }
+    // }
 
     console.log(`Part 2`)
     console.log(`Tokens: ${tokens}`)

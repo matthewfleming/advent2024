@@ -15,7 +15,8 @@
     "@types/lodash": "^4.17.13",
     "d3": "^7.9.0",
     "lodash": "^4.17.21",
-    "mathjs": "^14.0.0"
+    "mathjs": "^14.0.0",
+    "prime-lib": "^0.5.0"
   },
   "devDependencies": {
     "@oclif/prettier-config": "^0.2.1",

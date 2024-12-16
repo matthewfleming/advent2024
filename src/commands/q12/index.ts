@@ -1,4 +1,3 @@
-/* eslint-disable max-depth */
 import {Command} from '@oclif/core'
 import {createReadStream} from 'node:fs'
 import {createInterface} from 'node:readline/promises'
